@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Gestión APR Santa Cruz de Cuca - Administración de Agua Potable Rural">
+    <title>APR Santa Cruz de Cuca | Sistema de Gestión</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Splash / Loading Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="water-drop">
+                    <svg viewBox="0 0 100 120" fill="none">
+                        <path d="M50 5 C50 5 10 60 10 80 C10 102 28 115 50 115 C72 115 90 102 90 80 C90 60 50 5 50 5Z" 
+                              fill="url(#dropGradient)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <defs>
+                            <linearGradient id="dropGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#60a5fa"/>
+                                <stop offset="100%" stop-color="#1e40af"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1 class="splash-title">APR Santa Cruz de Cuca</h1>
+                <p class="splash-subtitle">Sistema de Gestión de Agua Potable Rural</p>
+                <div class="splash-loader">
+                    <div class="loader-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container" style="display:none;">
+        
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 40 48" fill="none">
+                            <path d="M20 2 C20 2 4 24 4 32 C4 41 11 46 20 46 C29 46 36 41 36 32 C36 24 20 2 20 2Z" 
+                                  fill="url(#sidebarDrop)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                            <defs>
+                                <linearGradient id="sidebarDrop" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#60a5fa"/>
+                                    <stop offset="100%" stop-color="#2563eb"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-name">APR Santa Cruz</span>
+                        <span class="logo-sub">Sistema de Gestión</span>
+                    </div>
+                </div>
+                <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+                    <i data-lucide="panel-left-close" class="icon"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active" data-page="dashboard">
+                        <a href="#dashboard" class="nav-link">
+                            <i data-lucide="layout-dashboard" class="nav-icon"></i>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="socios">
+                        <a href="#socios" class="nav-link">
+                            <i data-lucide="users" class="nav-icon"></i>
+                            <span class="nav-text">Socios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="pagos">
+                        <a href="#pagos" class="nav-link">
+                            <i data-lucide="credit-card" class="nav-icon"></i>
+                            <span class="nav-text">Pagos y Deudas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="mapa">
+                        <a href="#mapa" class="nav-link">
+                            <i data-lucide="map" class="nav-icon"></i>
+                            <span class="nav-text">Red de Agua</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="averias">
+                        <a href="#averias" class="nav-link">
+                            <i data-lucide="alert-triangle" class="nav-icon"></i>
+                            <span class="nav-text">Averías</span>
+                            <span class="nav-badge" id="averia-badge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-page="notificaciones">
+                        <a href="#notificaciones" class="nav-link">
+                            <i data-lucide="bell" class="nav-icon"></i>
+                            <span class="nav-text">Notificaciones</span>
+                            <span class="nav-badge" id="notif-badge">5</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span>RA</span>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">Rodrigo Admin</span>
+                        <span class="user-role">Administrador</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
+                        <i data-lucide="menu" class="icon"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span id="page-title" class="page-title">Dashboard</span>
+                    </div>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" placeholder="Buscar..." class="search-input" id="global-search">
+                    </div>
+                    <button class="top-bar-btn" id="theme-toggle" aria-label="Toggle theme">
+                        <i data-lucide="moon" class="icon"></i>
+                    </button>
+                    <button class="top-bar-btn notification-btn" id="notif-toggle" aria-label="Notifications">
+                        <i data-lucide="bell" class="icon"></i>
+                        <span class="notification-dot"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Content Container -->
+            <div class="page-container">
+
+                <!-- ==================== DASHBOARD PAGE ==================== -->
+                <section id="page-dashboard" class="page active">
+                    <div class="dashboard-grid">
+                        <!-- KPI Cards -->
+                        <div class="kpi-row">
+                            <div class="kpi-card" id="kpi-socios">
+                                <div class="kpi-icon blue">
+                                    <i data-lucide="users" class="icon"></i>
+                                </div>
+                                <div class="kpi-data">
+                                    <span class="kpi-value" data-target="247">0</span>
+                                    <span class="kpi-label">Socios Activos</span>
+                                </div>
+                                <div class="kpi-trend up">
+                                    <i data-lucide="trending-up" class="icon-sm"></i>
+                                    <span>+12%</span>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card" id="kpi-recaudacion">
+                                <div class="kpi-icon green">
+                                    <i data-lucide="dollar-sign" class="icon"></i>
+                                </div>
+                                <div class="kpi-data">
+                                    <span class="kpi-value" data-target="3450000" data-prefix="$">$0</span>
+                                    <span class="kpi-label">Recaudación Mensual</span>
+                                </div>
+                                <div class="kpi-trend up">
+                                    <i data-lucide="trending-up" class="icon-sm"></i>
+                                    <span>+8.3%</span>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card" id="kpi-deudas">
+                                <div class="kpi-icon orange">
+                                    <i data-lucide="alert-circle" class="icon"></i>
+                                </div>
+                                <div class="kpi-data">
+                                    <span class="kpi-value" data-target="32">0</span>
+                                    <span class="kpi-label">Socios con Deuda</span>
+                                </div>
+                                <div class="kpi-trend down">
+                                    <i data-lucide="trending-down" class="icon-sm"></i>
+                                    <span>-5.2%</span>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card" id="kpi-averias">
+                                <div class="kpi-icon red">
+                                    <i data-lucide="wrench" class="icon"></i>
+                                </div>
+                                <div class="kpi-data">
+                                    <span class="kpi-value" data-target="3">0</span>
+                                    <span class="kpi-label">Averías Pendientes</span>
+                                </div>
+                                <div class="kpi-trend neutral">
+                                    <i data-lucide="minus" class="icon-sm"></i>
+                                    <span>Sin cambio</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row -->
+                        <div class="charts-row">
+                            <div class="chart-card large">
+                                <div class="card-header">
+                                    <h3>Recaudación Mensual</h3>
+                                    <div class="card-actions">
+                                        <select id="chart-period" class="select-mini">
+                                            <option value="12">Últimos 12 meses</option>
+                                            <option value="6">Últimos 6 meses</option>
+                                            <option value="3">Últimos 3 meses</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="revenue-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="card-header">
+                                    <h3>Estado de Pagos</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="payment-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Row -->
+                        <div class="bottom-row">
+                            <div class="card recent-activity">
+                                <div class="card-header">
+                                    <h3>Actividad Reciente</h3>
+                                    <a href="#notificaciones" class="card-link" onclick="navigateTo('notificaciones')">Ver todo</a>
+                                </div>
+                                <div class="activity-list" id="activity-list">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                            <div class="card consumption-chart">
+                                <div class="card-header">
+                                    <h3>Consumo de Agua (m³)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="consumption-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== SOCIOS PAGE ==================== -->
+                <section id="page-socios" class="page">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h2>Gestión de Socios</h2>
+                            <p class="page-description">Administra los miembros de la asociación</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openModal('modal-socio')">
+                            <i data-lucide="user-plus" class="icon-sm"></i>
+                            <span>Nuevo Socio</span>
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <select id="filter-estado-socio" class="filter-select">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                                <option value="suspendido">Suspendido</option>
+                            </select>
+                            <select id="filter-sector" class="filter-select">
+                                <option value="">Todos los sectores</option>
+                                <option value="norte">Sector Norte</option>
+                                <option value="sur">Sector Sur</option>
+                                <option value="centro">Sector Centro</option>
+                                <option value="oriente">Sector Oriente</option>
+                            </select>
+                        </div>
+                        <div class="filter-search">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" placeholder="Buscar socio..." id="search-socios" class="search-input">
+                        </div>
+                    </div>
+
+                    <!-- Socios Table -->
+                    <div class="table-wrapper">
+                        <table class="data-table" id="socios-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>RUT</th>
+                                    <th>Sector</th>
+                                    <th>Medidor</th>
+                                    <th>Estado</th>
+                                    <th>Consumo (m³)</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="socios-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-pagination">
+                        <span class="pagination-info">Mostrando <strong>1-15</strong> de <strong>247</strong> socios</span>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" disabled><i data-lucide="chevron-left" class="icon-sm"></i></button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn">2</button>
+                            <button class="pagination-btn">3</button>
+                            <span class="pagination-dots">...</span>
+                            <button class="pagination-btn">17</button>
+                            <button class="pagination-btn"><i data-lucide="chevron-right" class="icon-sm"></i></button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== PAGOS PAGE ==================== -->
+                <section id="page-pagos" class="page">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h2>Control de Pagos y Deudas</h2>
+                            <p class="page-description">Gestión financiera de la asociación</p>
+                        </div>
+                        <div class="page-header-actions">
+                            <button class="btn btn-outline" onclick="exportPayments()">
+                                <i data-lucide="download" class="icon-sm"></i>
+                                <span>Exportar</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="openModal('modal-pago')">
+                                <i data-lucide="plus" class="icon-sm"></i>
+                                <span>Registrar Pago</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Payment Summary Cards -->
+                    <div class="payment-summary">
+                        <div class="summary-card green-card">
+                            <div class="summary-icon"><i data-lucide="check-circle" class="icon"></i></div>
+                            <div class="summary-data">
+                                <span class="summary-value">$3.450.000</span>
+                                <span class="summary-label">Recaudado este mes</span>
+                            </div>
+                        </div>
+                        <div class="summary-card red-card">
+                            <div class="summary-icon"><i data-lucide="alert-circle" class="icon"></i></div>
+                            <div class="summary-data">
+                                <span class="summary-value">$1.280.000</span>
+                                <span class="summary-label">Deuda total acumulada</span>
+                            </div>
+                        </div>
+                        <div class="summary-card blue-card">
+                            <div class="summary-icon"><i data-lucide="percent" class="icon"></i></div>
+                            <div class="summary-data">
+                                <span class="summary-value">87%</span>
+                                <span class="summary-label">Tasa de cobro</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab active" data-tab="pagos-recientes">Pagos Recientes</button>
+                        <button class="tab" data-tab="deudores">Deudores</button>
+                        <button class="tab" data-tab="historial">Historial</button>
+                    </div>
+
+                    <!-- Tab Content: Pagos Recientes -->
+                    <div class="tab-content active" id="tab-pagos-recientes">
+                        <div class="table-wrapper">
+                            <table class="data-table" id="pagos-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Socio</th>
+                                        <th>Monto</th>
+                                        <th>Método</th>
+                                        <th>Período</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pagos-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Deudores -->
+                    <div class="tab-content" id="tab-deudores">
+                        <div class="table-wrapper">
+                            <table class="data-table" id="deudores-table">
+                                <thead>
+                                    <tr>
+                                        <th>Socio</th>
+                                        <th>RUT</th>
+                                        <th>Meses Impagos</th>
+                                        <th>Deuda Total</th>
+                                        <th>Último Pago</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deudores-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Historial -->
+                    <div class="tab-content" id="tab-historial">
+                        <div class="chart-container" style="height:400px;">
+                            <canvas id="historial-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== MAPA PAGE ==================== -->
+                <section id="page-mapa" class="page">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h2>Monitoreo de Red de Agua</h2>
+                            <p class="page-description">Mapa interactivo de la infraestructura</p>
+                        </div>
+                        <div class="map-legend-toggle">
+                            <button class="btn btn-outline btn-sm" id="toggle-legend">
+                                <i data-lucide="layers" class="icon-sm"></i>
+                                <span>Capas</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <div id="water-map" class="map-view"></div>
+                        <div class="map-sidebar" id="map-sidebar">
+                            <div class="map-sidebar-header">
+                                <h4>Capas del Mapa</h4>
+                                <button class="close-btn" onclick="document.getElementById('map-sidebar').classList.remove('open')">
+                                    <i data-lucide="x" class="icon-sm"></i>
+                                </button>
+                            </div>
+                            <div class="layer-controls">
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="layer-red" checked>
+                                    <span class="layer-color" style="background:#ff7f00"></span>
+                                    Red de Agua Potable
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="layer-aprs" checked>
+                                    <span class="layer-color" style="background:#ff0000"></span>
+                                    Puntos APR
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="layer-edificaciones" checked>
+                                    <span class="layer-color" style="background:#ffff33"></span>
+                                    Edificaciones
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="layer-servicio" checked>
+                                    <span class="layer-color" style="background:#1e08c5"></span>
+                                    Área de Servicio
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="layer-entidades" checked>
+                                    <span class="layer-color" style="background:#fff5f0"></span>
+                                    Entidades Rurales
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="layer-averias-map" checked>
+                                    <span class="layer-color" style="background:#e11d48"></span>
+                                    Averías Reportadas
+                                </label>
+                            </div>
+                            <div class="map-stats">
+                                <h4>Estadísticas de Red</h4>
+                                <div class="stat-item">
+                                    <span class="stat-label">Longitud total red</span>
+                                    <span class="stat-value">12.4 km</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Conexiones activas</span>
+                                    <span class="stat-value">247</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Presión promedio</span>
+                                    <span class="stat-value">3.2 bar</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Caudal captación</span>
+                                    <span class="stat-value">8.5 L/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== AVERÍAS PAGE ==================== -->
+                <section id="page-averias" class="page">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h2>Reportes de Averías</h2>
+                            <p class="page-description">Gestión de incidencias y mantenimiento</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openModal('modal-averia')">
+                            <i data-lucide="plus" class="icon-sm"></i>
+                            <span>Nueva Avería</span>
+                        </button>
+                    </div>
+
+                    <!-- Avería Stats -->
+                    <div class="averia-stats">
+                        <div class="averia-stat-card pending">
+                            <div class="averia-stat-number">3</div>
+                            <div class="averia-stat-label">Pendientes</div>
+                            <div class="averia-stat-icon"><i data-lucide="clock" class="icon"></i></div>
+                        </div>
+                        <div class="averia-stat-card in-progress">
+                            <div class="averia-stat-number">2</div>
+                            <div class="averia-stat-label">En Proceso</div>
+                            <div class="averia-stat-icon"><i data-lucide="loader" class="icon"></i></div>
+                        </div>
+                        <div class="averia-stat-card resolved">
+                            <div class="averia-stat-number">18</div>
+                            <div class="averia-stat-label">Resueltas (mes)</div>
+                            <div class="averia-stat-icon"><i data-lucide="check-circle" class="icon"></i></div>
+                        </div>
+                        <div class="averia-stat-card avg-time">
+                            <div class="averia-stat-number">4.2h</div>
+                            <div class="averia-stat-label">Tiempo Promedio</div>
+                            <div class="averia-stat-icon"><i data-lucide="timer" class="icon"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Averías List -->
+                    <div class="averias-grid" id="averias-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+
+                <!-- ==================== NOTIFICACIONES PAGE ==================== -->
+                <section id="page-notificaciones" class="page">
+                    <div class="page-header">
+                        <div class="page-header-left">
+                            <h2>Centro de Notificaciones</h2>
+                            <p class="page-description">Alertas y comunicaciones del sistema</p>
+                        </div>
+                        <div class="page-header-actions">
+                            <button class="btn btn-outline" onclick="markAllRead()">
+                                <i data-lucide="check-check" class="icon-sm"></i>
+                                <span>Marcar todas como leídas</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="openModal('modal-notificacion')">
+                                <i data-lucide="send" class="icon-sm"></i>
+                                <span>Enviar Notificación</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Notification Filters -->
+                    <div class="notif-filters">
+                        <button class="notif-filter active" data-filter="all">Todas</button>
+                        <button class="notif-filter" data-filter="alerta">Alertas</button>
+                        <button class="notif-filter" data-filter="pago">Pagos</button>
+                        <button class="notif-filter" data-filter="averia">Averías</button>
+                        <button class="notif-filter" data-filter="sistema">Sistema</button>
+                    </div>
+
+                    <!-- Notifications List -->
+                    <div class="notifications-list" id="notifications-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+    
+    <!-- Modal: Nuevo Socio -->
+    <div class="modal-overlay" id="modal-socio">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Nuevo Socio</h3>
+                <button class="close-btn" onclick="closeModal('modal-socio')">
+                    <i data-lucide="x" class="icon"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-socio" onsubmit="saveSocio(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="socio-nombre">Nombre completo</label>
+                            <input type="text" id="socio-nombre" required placeholder="Ej: Juan Pérez García">
+                        </div>
+                        <div class="form-group">
+                            <label for="socio-rut">RUT</label>
+                            <input type="text" id="socio-rut" required placeholder="12.345.678-9">
+                        </div>
+                        <div class="form-group">
+                            <label for="socio-telefono">Teléfono</label>
+                            <input type="tel" id="socio-telefono" placeholder="+56 9 1234 5678">
+                        </div>
+                        <div class="form-group">
+                            <label for="socio-email">Email</label>
+                            <input type="email" id="socio-email" placeholder="correo@ejemplo.cl">
+                        </div>
+                        <div class="form-group">
+                            <label for="socio-sector">Sector</label>
+                            <select id="socio-sector" required>
+                                <option value="">Seleccionar sector</option>
+                                <option value="norte">Sector Norte</option>
+                                <option value="sur">Sector Sur</option>
+                                <option value="centro">Sector Centro</option>
+                                <option value="oriente">Sector Oriente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="socio-medidor">N° Medidor</label>
+                            <input type="text" id="socio-medidor" placeholder="MED-001">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="socio-direccion">Dirección</label>
+                            <input type="text" id="socio-direccion" placeholder="Dirección completa">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('modal-socio')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Socio</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Registrar Pago -->
+    <div class="modal-overlay" id="modal-pago">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Registrar Pago</h3>
+                <button class="close-btn" onclick="closeModal('modal-pago')">
+                    <i data-lucide="x" class="icon"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-pago" onsubmit="savePago(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="pago-socio">Socio</label>
+                            <select id="pago-socio" required>
+                                <option value="">Seleccionar socio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pago-monto">Monto ($)</label>
+                            <input type="number" id="pago-monto" required placeholder="15000">
+                        </div>
+                        <div class="form-group">
+                            <label for="pago-periodo">Período</label>
+                            <input type="month" id="pago-periodo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pago-metodo">Método de Pago</label>
+                            <select id="pago-metodo" required>
+                                <option value="">Seleccionar</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="tarjeta">Tarjeta</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="pago-observacion">Observación</label>
+                            <textarea id="pago-observacion" rows="2" placeholder="Nota adicional..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('modal-pago')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nueva Avería -->
+    <div class="modal-overlay" id="modal-averia">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Reportar Avería</h3>
+                <button class="close-btn" onclick="closeModal('modal-averia')">
+                    <i data-lucide="x" class="icon"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-averia" onsubmit="saveAveria(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="averia-tipo">Tipo de Avería</label>
+                            <select id="averia-tipo" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="fuga">Fuga de agua</option>
+                                <option value="rotura">Rotura de tubería</option>
+                                <option value="presion">Baja presión</option>
+                                <option value="calidad">Calidad del agua</option>
+                                <option value="medidor">Problema de medidor</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="averia-prioridad">Prioridad</label>
+                            <select id="averia-prioridad" required>
+                                <option value="baja">Baja</option>
+                                <option value="media" selected>Media</option>
+                                <option value="alta">Alta</option>
+                                <option value="critica">Crítica</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="averia-sector">Sector</label>
+                            <select id="averia-sector" required>
+                                <option value="">Seleccionar sector</option>
+                                <option value="norte">Sector Norte</option>
+                                <option value="sur">Sector Sur</option>
+                                <option value="centro">Sector Centro</option>
+                                <option value="oriente">Sector Oriente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="averia-reportante">Reportado por</label>
+                            <input type="text" id="averia-reportante" placeholder="Nombre del reportante">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="averia-descripcion">Descripción</label>
+                            <textarea id="averia-descripcion" rows="3" required placeholder="Describa la avería en detalle..."></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="averia-ubicacion">Ubicación / Referencia</label>
+                            <input type="text" id="averia-ubicacion" placeholder="Ej: Frente a la sede social">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('modal-averia')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Avería</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Enviar Notificación -->
+    <div class="modal-overlay" id="modal-notificacion">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Enviar Notificación</h3>
+                <button class="close-btn" onclick="closeModal('modal-notificacion')">
+                    <i data-lucide="x" class="icon"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-notificacion" onsubmit="sendNotification(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="notif-tipo">Tipo</label>
+                            <select id="notif-tipo" required>
+                                <option value="info">Informativa</option>
+                                <option value="alerta">Alerta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="notif-destinatario">Destinatario</label>
+                            <select id="notif-destinatario" required>
+                                <option value="todos">Todos los socios</option>
+                                <option value="deudores">Socios con deuda</option>
+                                <option value="sector-norte">Sector Norte</option>
+                                <option value="sector-sur">Sector Sur</option>
+                                <option value="sector-centro">Sector Centro</option>
+                                <option value="sector-oriente">Sector Oriente</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="notif-titulo">Título</label>
+                            <input type="text" id="notif-titulo" required placeholder="Asunto de la notificación">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="notif-mensaje">Mensaje</label>
+                            <textarea id="notif-mensaje" rows="4" required placeholder="Contenido del mensaje..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('modal-notificacion')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-icon"><i data-lucide="check-circle" class="icon"></i></div>
+        <div class="toast-message" id="toast-message">Operación exitosa</div>
+        <button class="toast-close" onclick="hideToast()"><i data-lucide="x" class="icon-sm"></i></button>
+    </div>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
